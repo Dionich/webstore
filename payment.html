@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Оплата</title>
+    <style>
+        /* Стили для окна оплаты */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f1f1f1;
+        }
+
+        .payment-container {
+            width: 320px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .payment-title {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .payment-form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .form-input {
+            padding: 10px;
+            border: 1px solid #cccccc;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .form-submit {
+            padding: 10px;
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .form-submit:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="payment-container">
+        <h1 class="payment-title">Вікно оплати</h1>
+
+        <form class="payment-form" id="payment-form">
+            <label class="form-label" for="email">Email:</label>
+            <input class="form-input" type="email" id="email" name="email" required>
+
+            <label class="form-label" for="phone">Номер телефона:</label>
+            <input class="form-input" type="tel" id="phone" name="phone" required>
+
+            <label class="form-label" for="card-number">Номер картки:</label>
+            <input class="form-input" type="text" id="card-number" name="cardNumber" required>
+
+            <label class="form-label" for="expiry-date">Дата дії картки (MM/YY):</label>
+            <input class="form-input" type="text" id="expiry-date" name="expiryDate" pattern="^(0[1-9]|1[0-2])\/\d{2}$"
+                title="Введіть дату у форматі MM/YY" required>
+
+            <label class="form-label" for="cvv">CVV код:</label>
+            <input class="form-input" type="text" id="cvv" name="cvv" required>
+
+            <label class="form-label" for="card-type">Тип картки:</label>
+            <select class="form-input" id="card-type" name="cardType" required>
+                <option value="visa">Visa</option>
+                <option value="mastercard">Mastercard</option>
+            </select>
+
+            <output type="hidden" id="total-price" name="totalPrice" value="0"></output>
+
+            <button class="form-submit" type="submit">Сплатити</button>
+        </form>
+    </div>
+</body>
+
+<script>
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('userId');
+
+    function setTotalPrice() {
+        const cartItemsUrl = `http://localhost:3001/cartItems/${userId}`;
+
+        fetch(cartItemsUrl, {
+            headers: {
+                'Content-Type': 'application/json',
+                userId: userId
+            },
+        })
+            .then((response) => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Помилка під час завантаження кошика товарів');
+                }
+            })
+            .then((cartItems) => {
+                const productIds = [];
+
+                cartItems.forEach((item) => {
+                    productIds.push(item.product_id);
+                });
+
+                const productsUrl = `http://localhost:3001/api/products?id=${productIds.join(',')}`;
+
+                return fetch(productsUrl, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                })
+                    .then((response) => {
+                        if (response.ok) {
+                            return response.json();
+                        } else {
+                            throw new Error('Помилка при отриманні інформації про товари');
+                        }
+                    })
+                    .then((products) => {
+                        let totalPrice = 0;
+
+                        cartItems.forEach((cartItem) => {
+                            const product = products.find((product) => product.id === cartItem.product_id);
+
+                            if (product) {
+                                const productPrice = parseFloat(product.price);
+                                totalPrice += productPrice;
+                            }
+                        });
+
+                        window.productIds = productIds;
+
+                        return totalPrice;
+                    });
+
+            })
+            .then((totalPrice) => {
+                document.getElementById('total-price').value = "Сума до сплати: " + totalPrice + " ₴";
+            })
+            .catch((error) => {
+                console.error('Помилка при отриманні інформації про товар:', error);
+            });
+    }
+
+    function getProductData(productId) {
+        const url = `http://localhost:3001/api/products/${productId}`;
+
+        return fetch(url, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Помилка при отриманні інформації про товар');
+                }
+            });
+    }
+
+    document.getElementById('payment-form').addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const request = new XMLHttpRequest();
+        request.open('POST', 'http://localhost:3001/purchase');
+        request.setRequestHeader('Content-Type', 'application/json');
+
+        request.onreadystatechange = function () {
+            if (request.readyState === XMLHttpRequest.DONE) {
+                if (request.status === 200) {
+                    window.location.href = ("http://localhost:3001/");
+                } else {
+                    console.error('Помилка виконання запиту: ' + request.status);
+                }
+            }
+        };
+
+        const receiptNumber = generateReceiptNumber();
+        console.log(receiptNumber);
+        const requestBody = JSON.stringify({ userId, receiptNumber });
+        request.send(requestBody);
+
+    });
+
+    function generateReceiptNumber() {
+        const alphanumericChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        const receiptLength = 10;
+        let receiptNumber = '';
+
+        for (let i = 0; i < receiptLength; i++) {
+            const randomIndex = Math.floor(Math.random() * alphanumericChars.length);
+            receiptNumber += alphanumericChars.charAt(randomIndex);
+        }
+
+        return receiptNumber;
+    }
+
+
+
+    const expiryDateInput = document.getElementById('expiry-date');
+
+    expiryDateInput.addEventListener('input', function () {
+        const value = this.value;
+        const sanitizedValue = value.replace(/\D/g, '').substring(0, 4);
+        const parts = [];
+
+        for (let i = 0, len = sanitizedValue.length; i < len; i += 2) {
+            parts.push(sanitizedValue.substring(i, i + 2));
+        }
+
+        this.value = parts.join('/') + sanitizedValue.substring(4, 6);
+    });
+
+    function handlePayment() {
+        const email = document.getElementById('email').value;
+        const phone = document.getElementById('phone').value;
+        const cardNumber = document.getElementById('card-number').value;
+        const expiryDate = document.getElementById('expiry-date').value;
+        const cvv = document.getElementById('cvv').value;
+        const cardType = document.getElementById('card-type').value;
+        const totalPrice = document.getElementById('total-price').value;
+
+        const productIds = window.productIds;
+
+        fetch('http://localhost:3001/checkout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                userid: userId,
+            },
+            body: JSON.stringify({
+                email,
+                phone,
+                cardNumber,
+                expiryDate,
+                cvv,
+                cardType,
+                totalPrice,
+                productIds
+            }),
+        })
+            .then((response) => {
+                if (response.ok) {
+                } else {
+                    throw new Error('Помилка під час обробки платежу');
+                }
+            })
+            .catch((error) => {
+                console.error('Помилка при обробці платежу:', error);
+            });
+    }
+
+
+    document.getElementById('payment-form').addEventListener('submit', (event) => {
+        event.preventDefault();
+        handlePayment();
+    });
+
+
+    setTotalPrice();
+
+</script>
+
+</html>
