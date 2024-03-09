@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Админ-панель</title>
+    <style>
+        /* Стили для навигационного меню */
+        .nav-menu {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0 0 0;
+            border-top: 1px solid #ccc;
+            overflow: hidden;
+        }
+
+        .nav-menu li {
+            display: inline-block;
+        }
+
+        .nav-menu li a {
+            text-decoration: none;
+            padding: 8px 16px;
+            border: 1px solid #ccc;
+            background-color: #f5f5f5;
+            color: #333;
+            transition: background-color 0.3s ease;
+        }
+
+        .nav-menu li a:hover {
+            background-color: #eaeaea;
+        }
+
+        /* Стили для контейнера содержимого */
+        #content-container {
+            margin-top: 50px;
+            border: 1px solid #ccc;
+            padding: 20px;
+        }
+
+        .add-product-btn,
+        .add-filter-btn {
+            position: absolute;
+            visibility: hidden;
+            padding: 8px 16px;
+            margin-top: 10px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            text-transform: uppercase;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .add-product-btn:hover,
+        .add-filter-btn:hover {
+            background-color: #45a049;
+        }
+
+        /* Стили для таблицы */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            width: 50%;
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f5f5f5;
+
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .edit-button {
+            text-align: right;
+        }
+
+        #add-product-overlay,
+        #add-filter-overlay,
+        #edit-user-overlay,
+        #edit-product-overlay,
+        #edit-filter-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 9990;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .overlay-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            max-width: 400px;
+            /* Максимальная ширина окна */
+            width: 100%;
+            box-sizing: border-box;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+        }
+
+        #close-form-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 20px;
+            color: #aaa;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+        }
+
+        #delete-user-edit-btn,
+        #delete-product-edit-btn,
+        #delete-filter-edit-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 20px;
+            color: #aaa;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+        }
+
+        #close-form-btn:hover {
+            color: #333;
+        }
+
+        #delete-user-edit-btn,
+        #delete-product-edit-btn,
+        #delete-filter-edit-btn {
+            color: #333;
+        }
+
+        .overlay-content h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .input-container {
+            margin-bottom: 10px;
+        }
+
+        .input-container input {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            box-sizing: border-box;
+            /* Добавьте это свойство */
+        }
+
+
+        button[type="submit"] {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #4caf50;
+            color: #fff;
+            font-size: 16px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+
+
+        /* Стили для формы добавления товара и фильтра */
+        .add-product-form,
+        .add-filter-form,
+        .edit-user-form,
+        .edit-product-form,
+        .edit-filter-form {
+            display: none;
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            padding: 20px;
+        }
+
+        .add-product-form input[type="text"],
+        .add-product-form input[type="number"],
+        .add-filter-form input[type="text"],
+        .add-filter-form input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .add-product-form button,
+        .add-filter-form button {
+            padding: 8px 16px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            text-transform: uppercase;
+            transition: background-color 0.3s ease;
+        }
+
+        .add-product-form button:hover,
+        .add-filter-form button:hover {
+            background-color: #45a049;
+        }
+
+        .delete-button {
+            background-color: #ff0000;
+            color: #ffffff;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* Стили для увеличенного окна подтверждения */
+        #confirmationModal_user,
+        #confirmationModal_product,
+        #confirmationModal_filter {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 5px;
+            border-color: #333;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 9999;
+            width: 200px;
+            height: 200px;
+        }
+
+        #confirmationModal_user h3,
+        #confirmationModal_product h3,
+        #confirmationModal_filter h3 {
+            margin-top: 0;
+            font-size: 18px;
+        }
+
+        #confirmationModal_user p,
+        #confirmationModal_product p,
+        #confirmationModal_filter p {
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        #confirmationModal_user button,
+        #confirmationModal_product button,
+        #confirmationModal_filter button {
+            background-color: #ff0000;
+            color: #ffffff;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+            font-size: 14px;
+            pointer-events: auto;
+        }
+    </style>
+
+</head>
+
+
+<body>
+    <h1>Панель адміна</h1>
+    <div id="success-message" style="display: none;"></div>
+
+    <div id="add-product-overlay" style="display: none;">
+        <div class="overlay-container">
+            <div class="overlay-content">
+                <button id="close-product-form-btn">&#10006;</button>
+                <form id="product-form" enctype="multipart/form-data">
+                    <h2>Додати товар</h2>
+                    <div class="input-container">
+                        <input id="product-name" type="text" name="name" placeholder="Назва товару">
+                    </div>
+                    <div class="input-container">
+                        <input id="product-price" type="price" name="price" placeholder="Ціна">
+                    </div>
+                    <div class="input-container">
+                        <input id="product-description" type="description" name="description" placeholder="Опис">
+                    </div>
+                    <div class="input-container">
+                        <input id="product-en_description" type="description" name="en_description"
+                            placeholder="Опис на англійській">
+                    </div>
+                    <div class="input-container">
+                        <select id="filters-select" name="filters">
+                            <option value="">Фільтри</option>
+                        </select>
+                    </div>
+                    <div class="input-container">
+                        <label for="product-image">Зображення:</label>
+                        <div class="product-image-wrapper">
+                            <input type="file" id="product-image" name="image" accept="image/*">
+                        </div>
+                    </div>
+                    <button id="add-product-btn" type="submit">Додати товар</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="add-filter-overlay" style="display: none;">
+        <div class="overlay-container">
+            <div class="overlay-content">
+                <button id="close-filter-form-btn">&#10006;</button>
+                <form id="filter-form">
+                    <h2>Додавання фільтра</h2>
+                    <div class="input-container">
+                        <input id="filter-name" type="text" name="name" placeholder="Назва фільтра">
+                    </div>
+                    <div class="input-container">
+                        <input id="filter-en-name" type="text" name="en_name" placeholder="Англійська назва фільтра">
+                    </div>
+                    <button id="add-filter-btn" type="submit">Додати фільтр</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="edit-user-overlay" style="display: none;">
+        <div class="overlay-container">
+            <div class="overlay-content">
+                <button id="close-user-edit-btn">&#10006;</button>
+                <button id="delete-product-edit-btn"
+                    onclick="showConfirmationModal(document.getElementById('confirmationModal_user'))">&#8855;</button>
+                <div class="overlay" id="user_overlay">
+                    <div id="confirmationModal_user" style="display: none;">
+                        <h3>Підтвердження видалення</h3>
+                        <p>Ви впевнені, що бажаєте видалити товар?</p>
+                        <button id="confirmDeleteButton_user">Підтвердити</button>
+                        <button id="cancelDeleteButton_user">Відміна</button>
+                    </div>
+                </div>
+                <form id="user-edit-form">
+                    <h2>Редагування інформації про користувача</h2>
+                    <div class="input-container">
+                        <input id="edit-user-id" type="hidden" name="id">
+                    </div>
+                    <div class="input-container">
+                        <input id="edit-user-name" type="text" name="name" placeholder="Ім'я користувача">
+                    </div>
+                    <div class="input-container">
+                        <input id="edit-user-email" type="text" name="email" placeholder="Пошта користувача">
+                    </div>
+                    <button id="update-user-btn" onclick='submitEditForm("user-edit-form", event)' type="submit">Оновити
+                        фільтр</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="edit-product-overlay" style="display: none;">
+        <div class="overlay-container">
+            <div class="overlay-content">
+                <button id="close-product-edit-btn">&#10006;</button>
+                <button id="delete-product-edit-btn"
+                    onclick="showConfirmationModal(document.getElementById('confirmationModal_product'))">&#8855;</button>
+                <div class="overlay" id="product_overlay">
+                    <div id="confirmationModal_product" style="display: none;">
+                        <h3>Підтвердження видалення</h3>
+                        <p>Ви впевнені, що бажаєте видалити товар?</p>
+                        <button id="confirmDeleteButton_product">Підтвердити</button>
+                        <button id="cancelDeleteButton_product">Відміна</button>
+                    </div>
+                </div>
+                <form id="product-edit-form" enctype="multipart/form-data">
+                    <h2>Редагування товару</h2>
+                    <div class="input-container">
+                        <input id="edit-product-id" type="hidden" name="id">
+                    </div>
+                    <div class="input-container">
+                        <input id="edit-product-name" type="text" name="name" placeholder="Назва товару">
+                    </div>
+                    <div class="input-container">
+                        <input id="edit-product-price" type="price" name="price" placeholder="Ціна">
+                    </div>
+                    <div class="input-container">
+                        <input id="edit-product-description" type="description" name="description" placeholder="Опис">
+                    </div>
+                    <div class="input-container">
+                        <input id="edit-product-en-description" type="description" name="en_description"
+                            placeholder="Опис">
+                    </div>
+                    <div class="input-container">
+                        <select id="edit-filters-select" name="filters">
+                            <option value="">Фільтри</option>
+                        </select>
+                    </div>
+                    <div class="input-container">
+                        <label for="edit-product-image">Зображення:</label>
+                        <div class="product-image-wrapper">
+                            <input type="file" id="edit-product-image" name="image" accept="image/*">
+                            <span id="edit-selected-file-name">Файл не вибран</span>
+                        </div>
+                    </div>
+                    <button id="update-product-btn" onclick='submitEditForm("product-edit-form", event)'
+                        type="submit">Оновити
+                        товар</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="edit-filter-overlay" style="display: none;">
+        <div class="overlay-container">
+            <div class="overlay-content">
+                <button id="close-filter-edit-btn">&#10006;</button>
+                <button id="delete-filter-edit-btn"
+                    onclick="showConfirmationModal(document.getElementById('confirmationModal_filter'))">&#8855;</button>
+                <div class="overlay" id="filter_overlay">
+                    <div id="confirmationModal_filter" style="display: none;">
+                        <h3>Підтвердження видалення</h3>
+                        <p>Ви впевнені, що бажаєте видалити товар?</p>
+                        <button id="confirmDeleteButton_filter">Підтвердити</button>
+                        <button id="cancelDeleteButton_filter">Відміна</button>
+                    </div>
+                </div>
+                <form id="filter-edit-form">
+                    <h2>Редагування фільтра</h2>
+                    <div class="input-container">
+                        <input id="edit-filter-id" type="hidden" name="id">
+                    </div>
+                    <div class="input-container">
+                        <input id="edit-filter-name" type="text" name="name" placeholder="Назва фільтра">
+                    </div>
+                    <div class="input-container">
+                        <input id="edit-filter-en-name" type="text" name="en_name"
+                            placeholder="Англійська назва фільтра">
+                    </div>
+                    <button id="update-filter-btn" onclick='submitEditForm("filter-edit-form", event )'
+                        type="submit">Оновити
+                        фільтр</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <ul class="nav-menu">
+        <li><a href="#users">Користувачі</a></li>
+        <li><a href="#products">Продукти</a></li>
+        <li><a href="#filters">Фільтри</a></li>
+    </ul>
+
+    <a href="#add-filter" class="add-filter-btn">Додати фільтр</a>
+    <a href="#add-product" class="add-product-btn">Додати товар</a>
+
+    <div id="content-container"></div>
+
+
+    <script>
+        function getUsers() {
+            fetch('/api/users')
+                .then(response => response.json())
+                .then(users => {
+                    const usersData = { users: users };
+                    const renderedHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Ім'я</th>
+                            <th>Email</th>
+                            <th>Роль</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${usersData.users.map(user => `
+                            <tr>
+                                <td>${user.id}</td>
+                                <td>${user.username}</td>
+                                <td>${user.email}</td>
+                                <td>${user.role}</td>
+                                <td>
+                                    <button class="edit-button" onclick='editOpenForm("usersTab",${user.id})'  data-user-id="${user.id}">
+                                        Редагувати
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+                    const contentContainer = document.getElementById('content-container');
+                    contentContainer.innerHTML = renderedHTML;
+                })
+                .catch(error => {
+                    console.error('Помилка при отриманні списку користувачів:', error);
+                });
+        }
+        function getProducts() {
+            fetch('/api/products')
+                .then(response => response.json())
+                .then(products => {
+                    const productsData = { products: products };
+                    const renderedHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Назва</th>
+                            <th>Ціна</th>
+                            <th>Фільтри</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${productsData.products.map(product => `
+                            <tr>
+                                <td>${product.id}</td>
+                                <td>${product.name}</td>
+                                <td>${product.price}</td>
+                                <td>${product.filter}</td>
+                                <td>
+                                    <button class="edit-button" onclick='editOpenForm("productsTab",${product.id})' data-product-id="${product.id}">
+                                        Редагувати
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+                    const contentContainer = document.getElementById('content-container');
+                    contentContainer.innerHTML = renderedHTML;
+                })
+                .catch(error => {
+                    console.error('Помилка при отриманні переліку товарів:', error);
+                });
+            renderFilterDropdown();
+        }
+        function getFilters() {
+            fetch('/api/filters')
+                .then(response => response.json())
+                .then(filters => {
+                    const filtersData = { filters: filters };
+
+                    const renderedHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Назва</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${filtersData.filters.map(filter => `
+                            <tr>
+                                <td>${filter.id}</td>
+                                <td>${filter.name}</td>
+                                <td>
+                                    <button class="edit-button" onclick='editOpenForm("filtersTab",${filter.id})' data-filter-id="${filter.id}">
+                                        Редагувати
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+                    const contentContainer = document.getElementById('content-container');
+                    contentContainer.innerHTML = renderedHTML;
+
+                    const filtersSelect = document.getElementById('filters-select');
+                    filtersSelect.innerHTML = '';
+
+                    filtersData.filters.forEach(filter => {
+                        const option = document.createElement('option');
+                        option.value = filter.id;
+                        option.textContent = filter.name;
+                        filtersSelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Помилка при отриманні списку фільтрів:', error);
+                });
+        }
+
+
+
+
+        function addProduct() {
+            const productNameInput = document.getElementById('product-name');
+            const productPriceInput = document.getElementById('product-price');
+            const productDescriptionInput = document.getElementById('product-description');
+            const productEnDescriptionInput = document.getElementById('product-en_description');
+            const productImageInput = document.getElementById('product-image');
+            const productFilterInput = document.getElementById('filters-select');
+
+            const productName = productNameInput.value;
+            const productPrice = productPriceInput.value;
+            const productDescription = productDescriptionInput.value;
+            const productEnDescription = productEnDescriptionInput.value;
+            const productImage = productImageInput.files[0];
+            const productFilter = productFilterInput.options[productFilterInput.selectedIndex].value;
+            const reader = new FileReader();
+            reader.readAsDataURL(productImage);
+            reader.onloadend = function () {
+                const base64Image = reader.result;
+
+                const formData = new FormData();
+                formData.append('name', productName);
+                formData.append('price', productPrice);
+                formData.append('description', productDescription);
+                formData.append('en_description', productEnDescription);
+                formData.append('image', base64Image);
+                formData.append('imageBody', productImage);
+                formData.append('filter', productFilter);
+
+                fetch('/api/products', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Товар успішно доданий:', data);
+                        productNameInput.value = '';
+                        productPriceInput.value = '';
+                        productDescriptionInput.value = '';
+                        productEnDescriptionInput.value = '';
+                        productImageInput.value = '';
+                        getProducts();
+                    })
+                    .catch(error => {
+                        console.error('Помилка при додаванні товару:', error);
+                    });
+            };
+        }
+        function addFilter() {
+            const filterNameInput = document.getElementById('filter-name');
+            const filterEnNameInput = document.getElementById('filter-en-name');
+            const filterName = filterNameInput.value;
+            const filterEnName = filterEnNameInput.value;
+
+            const newFilter = {
+                name: filterName,
+                en_name: filterEnName
+            };
+
+            fetch('/api/filters' + window.location.hash, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(newFilter)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Фільтр успішно доданий:', data);
+
+                    filterNameInput.value = '';
+                    filterEnNameInput.value = '';
+
+                    getFilters();
+                })
+                .catch(error => {
+                    console.error('Помилка при додаванні фільтра:', error);
+                });
+
+        }
+
+
+
+
+
+
+
+        const addProductBtn = document.querySelector('a[href="#add-product"]');
+        addProductBtn.addEventListener('click', () => {
+            const addProductFormOverlay = document.getElementById('add-product-overlay');
+            addProductFormOverlay.style.display = 'block';
+        });
+
+        const addProductFormSubmitBtn = document.getElementById('add-product-btn');
+        addProductFormSubmitBtn.addEventListener('click', () => {
+            event.preventDefault();
+            addProduct();
+        });
+
+
+        const addFilterBtn = document.querySelector('a[href="#add-filter"]');
+        addFilterBtn.addEventListener('click', () => {
+            const addFilterFormOverlay = document.getElementById('add-filter-overlay');
+            addFilterFormOverlay.style.display = 'block';
+        });
+        const addFilterFormSubmitBtn = document.getElementById('add-filter-btn');
+        addFilterFormSubmitBtn.addEventListener('click', () => {
+            event.preventDefault();
+            addFilter();
+        });
+
+        function buttonVisibilityChange(nameTab) {
+            if (nameTab === "usersTab") {
+                addProductBtn.style.visibility = 'hidden';
+                addFilterBtn.style.visibility = 'hidden';
+            }
+            else if (nameTab === "productsTab") {
+                addProductBtn.style.visibility = 'visible';
+                addFilterBtn.style.visibility = 'hidden';
+            }
+            else if (nameTab === "filtersTab") {
+                addProductBtn.style.visibility = 'hidden';
+                addFilterBtn.style.visibility = 'visible';
+            }
+        }
+
+        const usersTab = document.querySelector('a[href="#users"]');
+        usersTab.addEventListener('click', () => {
+            getUsers();
+            buttonVisibilityChange("usersTab");
+        });
+        const productsTab = document.querySelector('a[href="#products"]');
+        productsTab.addEventListener('click', () => {
+            getProducts();
+            buttonVisibilityChange("productsTab");
+        });
+        const filtersTab = document.querySelector('a[href="#filters"]');
+        filtersTab.addEventListener('click', () => {
+            getFilters();
+            buttonVisibilityChange("filtersTab");
+        });
+
+        function renderFilterDropdown() {
+            fetch('/api/filters')
+                .then(response => response.json())
+                .then(filters => {
+                    if (!Array.isArray(filters)) {
+                        filters = Array.from(filters);
+                    }
+
+                    const renderedHTML = `
+        <select>
+          ${filters.map(filter => `<option value="${filter.id}">${filter.name}</option>`).join('')}
+        </select>
+      `;
+
+                    const filtersDropdownContainer_edit = document.getElementById('edit-filters-select');
+                    filtersDropdownContainer_edit.innerHTML = renderedHTML;
+                    const filtersDropdownContainer_add = document.getElementById('filters-select');
+                    filtersDropdownContainer_add.innerHTML = renderedHTML;
+                })
+                .catch(error => {
+                    console.error('Помилка при отриманні даних про фільтри:', error);
+                });
+        }
+
+        function getUserData(userId) {
+            return new Promise((resolve, reject) => {
+                const url = `/api/users/${userId}`;
+
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => resolve(data))
+                    .catch(error => {
+                        console.error('Помилка при отриманні даних про користувача:', error);
+                        reject(error);
+                    });
+            });
+        }
+        function getProductData(productId) {
+            return fetch(`/api/products/${productId}`)
+                .then(response => response.json())
+                .then(productData => {
+                    return productData;
+                })
+                .catch(error => {
+                    console.error('Помилка при отриманні даних про товар:', error);
+                });
+        }
+
+        function getFilterData(filterId) {
+            return fetch(`/api/filters/${filterId}`)
+                .then(response => response.json())
+                .then(filterData => {
+                    return filterData;
+                })
+                .catch(error => {
+                    console.error('Помилка при отриманні даних про фільтр:', error);
+                });
+        }
+
+        function deleteUser() {
+            const userIdInput = document.getElementById("edit-user-id");
+            const userId = userIdInput.value;
+
+            fetch(`/api/users/${userId}`, {
+                method: 'DELETE'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data.message);
+                })
+                .catch(error => {
+                    console.error('Помилка при видаленні користувача:', error);
+                });
+            window.location.reload();
+        }
+
+        function deleteProduct() {
+            const productIdInput = document.getElementById("edit-product-id");
+            const productId = productIdInput.value;
+
+            fetch(`/api/products/${productId}`, {
+                method: 'DELETE'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data.message);
+                })
+                .catch(error => {
+                    console.error('Помилка при видаленні товару:', error);
+                });
+            window.location.reload();
+        }
+
+        function deleteFilter() {
+            const filterIdInput = document.getElementById("edit-filter-id");
+            const filterId = filterIdInput.value;
+
+            fetch(`/api/filters/${filterId}`, {
+                method: 'DELETE'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data.message);
+                })
+                .catch(error => {
+                    console.error('Помилка при видаленні фільтра:', error);
+                });
+            window.location.reload();
+        }
+
+
+
+
+        async function editOpenForm(tab, id) {
+            let overlayId;
+            let formId;
+
+            if (tab === 'usersTab') {
+                overlayId = 'edit-user-overlay';
+                formId = 'user-edit-form';
+            } else if (tab === 'productsTab') {
+                overlayId = 'edit-product-overlay';
+                formId = 'product-edit-form';
+            } else if (tab === 'filtersTab') {
+                overlayId = 'edit-filter-overlay';
+                formId = 'filter-edit-form';
+            }
+
+            const overlay = document.getElementById(overlayId);
+            overlay.style.display = 'block';
+
+            const form = document.getElementById(formId);
+            form.elements['id'].value = id;
+
+            if (tab === 'usersTab') {
+                getUserData(id)
+                    .then(userData => {
+                        form.elements['name'].value = userData.username;
+                        form.elements['email'].value = userData.email;
+                    })
+                    .catch(error => {
+                        console.error('Помилка при отриманні даних про користувача:', error);
+                    });
+                addEventListenersForUserOverlay();
+            } else if (tab === 'productsTab') {
+                getProductData(id)
+                    .then(productData => {
+                        form.elements['name'].value = productData.name;
+                        form.elements['price'].value = productData.price;
+                        form.elements['description'].value = productData.description;
+                        form.elements['en_description'].value = productData.en_description;
+
+                        if (productData.filter) {
+                            getFilterData(productData.filter)
+                                .then(filterData => {
+                                    const filterDropdown = renderFilterDropdown(filterData);
+
+                                    const editFilterSelect = document.getElementById('edit-filters-select');
+                                    editFilterSelect.innerHTML = filterDropdown;
+                                })
+                                .catch(error => {
+                                    console.error('Помилка при отриманні даних про фільтр:', error);
+                                });
+                        } else {
+                            console.error('productData.filters is empty');
+                        }
+
+                        if (productData.image_name) {
+                            const editFileName = document.getElementById('edit-selected-file-name');
+                            editFileName.innerHTML = productData.image_name;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Помилка при отриманні даних про товар:', error);
+                    });
+                addEventListenersForProductOverlay();
+
+            } else if (tab === 'filtersTab') {
+
+                getFilterData(id)
+                    .then(filterData => {
+                        form.elements['name'].value = filterData.name;
+                        form.elements['en_name'].value = filterData.en_name;
+                    })
+                    .catch(error => {
+                        console.error('Помилка при отриманні даних про користувача:', error);
+                    });
+                addEventListenersForFilterOverlay()
+            }
+        }
+
+        function submitEditForm(form1, event) {
+            event.preventDefault();
+            const form = document.getElementById(form1);
+            const id = form.elements['id'].value;
+
+            if (form1 === 'user-edit-form') {
+                const updatedUserData = {
+                    username: form.elements['name'].value,
+                    email: form.elements['email'].value,
+                };
+                const apiPath = `/api/users/${id}`;
+                fetch(apiPath, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(updatedUserData),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+
+                        const overlay = document.getElementById('edit-user-overlay');
+                        overlay.style.display = 'none';
+                        getUsers();
+                    })
+                    .catch(error => {
+                        console.error('Помилка при надсиланні змін на сервер:', error);
+                    });
+                const tab = document.getElementById('edit-user-overlay');
+                tab.style.display = 'none';
+            }
+
+            else if (form1 === 'product-edit-form') {
+                const productIdInput = document.getElementById('edit-product-id');
+                const productNameInput = document.getElementById('edit-product-name');
+                const productPriceInput = document.getElementById('edit-product-price');
+                const productFilterInput = document.getElementById('edit-filters-select');
+                const productDescriptionInput = document.getElementById('edit-product-description');
+                const productEnDescriptionInput = document.getElementById('edit-product-en-description');
+                const productImageInput = document.getElementById('edit-product-image');
+
+                const productId = productIdInput.value;
+                const productName = productNameInput.value;
+                const productPrice = productPriceInput.value;
+                const productFilter = productFilterInput.value;
+                const productDescription = productDescriptionInput.value;
+                const productEnDescription = productEnDescriptionInput.value;
+                const productImage = productImageInput.files[0];
+
+                if (productImage) {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(productImage);
+                    reader.onloadend = function () {
+                        const base64Image = reader.result;
+
+                        const formData = new FormData();
+                        formData.append('id', productId);
+                        formData.append('name', productName);
+                        formData.append('price', productPrice);
+                        formData.append('filter', productFilter);
+                        formData.append('description', productDescription);
+                        formData.append('en_description', productEnDescription);
+                        formData.append('image', base64Image);
+                        formData.append('imageBody', productImage);
+
+                        fetch(`/api/products/${productId}`, {
+                            method: 'PUT',
+                            body: formData
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log('Товар успішно оновлено:', data);
+                                productNameInput.value = '';
+                                productPriceInput.value = '';
+                                productFilterInput.value = '';
+                                productDescriptionInput.value = '';
+                                productEnDescriptionInput.value = '';
+                                productImageInput.value = '';
+                                getProducts();
+                            })
+                            .catch(error => {
+                                console.error('Помилка при оновленні товару:', error);
+                            });
+                    };
+                } else {
+                    const formData = new FormData();
+                    formData.append('id', productId);
+                    formData.append('name', productName);
+                    formData.append('price', productPrice);
+                    formData.append('filter', productFilter);
+                    formData.append('description', productDescription);
+                    formData.append('en_description', productEnDescription);
+
+                    fetch(`/api/products/${productId}`, {
+                        method: 'PUT',
+                        body: formData
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log('Товар успішно оновлено:', data);
+                            productNameInput.value = '';
+                            productPriceInput.value = '';
+                            productFilterInput.value = '';
+                            productDescriptionInput.value = '';
+                            productEnDescriptionInput.value = '';
+                            productImageInput.value = '';
+                            getProducts();
+
+
+                        })
+                        .catch(error => {
+                            console.error('Помилка при оновленні товару:', error);
+                        });
+                }
+                const tab = document.getElementById('edit-product-overlay');
+                tab.style.display = 'none';
+            }
+
+
+            else if (form1 === 'filter-edit-form') {
+                const updatedFilterData = {
+                    name: form.elements['name'].value,
+                    en_name: form.elements['en_name'].value,
+                };
+                const apiPath = `/api/filters/${id}`;
+                fetch(apiPath, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(updatedFilterData),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+
+                        const overlay = document.getElementById('edit-filter-overlay');
+                        overlay.style.display = 'none';
+                        getFilters();
+                    })
+                    .catch(error => {
+                        console.error('Помилка при надсиланні змін на сервер:', error);
+                    });
+                const tab = document.getElementById('edit-filter-overlay');
+                tab.style.display = 'none';
+            }
+        }
+
+        function showConfirmationModal(confirmationModal) {
+            confirmationModal.style.display = 'block';
+        }
+
+        function hideConfirmationModal(confirmationModal) {
+            confirmationModal.style.display = 'none';
+        }
+
+
+        function addEventListenersForUserOverlay() {
+            const userDeleteButton = document.getElementById('delete-user-edit-btn');
+            const userConfirmationOverlay = document.getElementById('user_overlay');
+            const userConfirmationModal = document.getElementById('confirmationModal_user');
+            const userConfirmDeleteButton = document.getElementById('confirmDeleteButton_user');
+            const userCancelDeleteButton = document.getElementById('cancelDeleteButton_user');
+
+            userConfirmDeleteButton.addEventListener('click', deleteUser);
+            userCancelDeleteButton.addEventListener('click', function () {
+                hideConfirmationModal(userConfirmationOverlay);
+            });
+        }
+
+        function addEventListenersForProductOverlay() {
+            const productDeleteButton = document.getElementById('delete-product-edit-btn');
+            const productConfirmationOverlay = document.getElementById('product_overlay');
+            const productConfirmationModal = document.getElementById('confirmationModal_product');
+            const productConfirmDeleteButton = document.getElementById('confirmDeleteButton_product');
+            const productCancelDeleteButton = document.getElementById('cancelDeleteButton_product');
+
+            productConfirmDeleteButton.addEventListener('click', deleteProduct);
+            productCancelDeleteButton.addEventListener('click', function () {
+                hideConfirmationModal(productConfirmationOverlay);
+            });
+        }
+
+        function addEventListenersForFilterOverlay() {
+            const filterDeleteButton = document.getElementById('delete-filter-edit-btn');
+            const filterConfirmationOverlay = document.getElementById('filter_overlay');
+            const filterConfirmationModal = document.getElementById('confirmationModal_filter');
+            const filterConfirmDeleteButton = document.getElementById('confirmDeleteButton_filter');
+            const filterCancelDeleteButton = document.getElementById('cancelDeleteButton_filter');
+
+            filterConfirmDeleteButton.addEventListener('click', deleteFilter);
+            filterCancelDeleteButton.addEventListener('click', function () {
+                hideConfirmationModal(filterConfirmationOverlay);
+            });
+        }
+
+
+        function handleFileInputChange(event) {
+            const fileInput = event.target;
+            const selectedFileName = document.getElementById('selected-file-name');
+
+            if (fileInput.files.length > 0) {
+                selectedFileName.textContent = fileInput.files[0].name;
+            }
+        }
+
+        const closeFormButton = document.getElementById('close-product-form-btn');
+        closeFormButton.addEventListener('click', () => {
+            const overlay = document.getElementById('add-product-overlay');
+            overlay.style.display = 'none';
+        });
+        const closeForm2Button = document.getElementById('close-filter-form-btn');
+        closeForm2Button.addEventListener('click', () => {
+            const overlay = document.getElementById('add-filter-overlay');
+            overlay.style.display = 'none';
+        });
+        const closeForm3Button = document.getElementById('close-user-edit-btn');
+        closeForm3Button.addEventListener('click', () => {
+            const overlay = document.getElementById('edit-user-overlay');
+            overlay.style.display = 'none';
+        });
+        const closeForm4Button = document.getElementById('close-product-edit-btn');
+        closeForm4Button.addEventListener('click', () => {
+            const overlay = document.getElementById('edit-product-overlay');
+            overlay.style.display = 'none';
+        });
+        const closeForm5Button = document.getElementById('close-filter-edit-btn');
+        closeForm5Button.addEventListener('click', () => {
+            const overlay = document.getElementById('edit-filter-overlay');
+            overlay.style.display = 'none';
+        });
+    </script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</body>
+
+
+
+</html>

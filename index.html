@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>WebStore</title>
+    <meta charset="utf-8">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <link rel="stylesheet" href="styles/style.css">
+    <link rel="stylesheet" href="styles/header.css">
+    <link rel="stylesheet" href="styles/footer.css">
+    <link rel="stylesheet" href="styles/slider.css">
+</head>
+
+<body>
+    <div id="registration-overlay" style="display: none;">
+        <div id="registration-form">
+            <button id="close-form-btn">&#10006;</button>
+            <form id="register-form">
+                <h2>Реєстрація</h2>
+                <div class="input-container">
+                    <input type="text" name="username" placeholder="Ім'я користувача">
+                </div>
+                <div class="input-container">
+                    <input type="email" name="email" placeholder="Email">
+                </div>
+                <div class="input-container">
+                    <input type="password" name="password" placeholder="Пароль">
+                    <span class="errorReg" style="color: red;"></span>
+                </div>
+                <button type="submit">Зареєструватись</button>
+            </form>
+            <div id="successMessage" style="display: none;">Реєстрація пройшла успішно!</div>
+            <form id="login-form">
+                <h2>Авторизація</h2>
+                <div class="input-container">
+                    <input type="text" name="username" placeholder="Ім'я користувача">
+                </div>
+                <div class="input-container">
+                    <input type="password" name="password" placeholder="Пароль">
+                    <span class="errorLog" style="color: red;"></span>
+                </div>
+                <button type="submit">Увійти</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="header_container">
+        <header>
+            <a class="logo">LOGO</a>
+            <div class="button">
+                <a href="#" class="account-button" id="account-button">
+                    <img src="images/account_image.png" id="account-image" alt="иконка аккаунта">
+                </a>
+            </div>
+        </header>
+    </div>
+
+    <div class="wrapper">
+        <div class="slider">
+            <div class="slider-container">
+                <div class="slider-wrapper">
+                    <img src="images/gtx-1050-ti-oc-4gb-550x550.jpg" alt="Slider Image 0" class="active">
+                    <img src="images/product-20.jpg" alt="Slider Image 1">
+                    <img src="images/product1.jpg" alt="Slider Image 2">
+                </div>
+
+                <div class="slider-controls">
+                    <button class="prev-button">&#8656;</button>
+                    <button class="next-button">&#8658;</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="main_container">
+            <aside class="filter-sidebar">
+                <div class="search-container">
+                    <input id="search-input" class="search-input" placeholder="Пошук">
+                    <ul id="search-results" class="search-results"></ul>
+                </div>
+                <div id="filter-container">
+                    <h2>Фільтри</h2>
+                    <ul id="standart-filters-list">
+                        <h4>Стандартні фільтри</h4>
+                        <li>
+                            <label>
+                                <input type="radio" name="filter" value="price_desc">
+                                Ціна за зростанням
+                            </label>
+                        </li>
+                        <li>
+                            <label>
+                                <input type="radio" name="filter" value="price">
+                                Ціна за спаданням
+                            </label>
+                        </li>
+                        <ul id="filters-list">
+                            <h4>Додаткові фільтри</h4>
+                        </ul>
+                    </ul>
+                </div>
+            </aside>
+
+            <main>
+                <div class="main_content">
+                    <section>
+                        <div class="products-container">
+
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div class="purchase-history"></div>
+
+
+    <footer>
+        <div class="col-sm-6">
+            <h3>Про нас</h3>
+            <p>Короткий опис компанії та її місії.</p>
+        </div>
+        <div class="col-sm-6">
+            <h3>Контакти</h3>
+            <ul class="list-unstyled">
+                <li><i class="fa fa-map-marker"></i>Адреса компанії</li>
+                <li><i class="fa fa-phone"></i>Номер телефону</li>
+                <li><i class="fa fa-envelope"></i>Адреса електронної пошти</li>
+            </ul>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+    <script src="scripts/main.js"></script>
+    <script src="scripts/login.js"></script>
+    <script src="scripts/header.js"></script>
+    <script src="scripts/slider.js"></script>
+</body>
+
+
+</html>
